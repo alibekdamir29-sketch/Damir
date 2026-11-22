@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F5F5F5"/><stop offset="1" stop-color="#E6E6E6"/></linearGradient>
+<radialGradient id="sh" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba(0,0,0,.18)"/><stop offset="1" stop-color="rgba(0,0,0,0)"/></radialGradient></defs>
+<rect width="800" height="1000" fill="url(#bg)"/>
+<ellipse cx="400" cy="900" rx="260" ry="26" fill="url(#sh)"/>
+<g fill="#111111" color="#111111" stroke="none" stroke-width="3"><path d="M280 210 L355 180 L400 230 L445 180 L520 210 L600 300 L650 700 L590 715 L545 380 L540 830 L260 830 L255 380 L210 715 L150 700 L200 300 Z"/><path d="M355 180 L400 260 L445 180" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="5"/><path d="M400 260 L400 830" stroke="rgba(0,0,0,.18)" stroke-width="4"/><g fill="rgba(255,255,255,.55)"><circle cx="412" cy="320" r="6"/><circle cx="412" cy="420" r="6"/><circle cx="412" cy="520" r="6"/><circle cx="412" cy="620" r="6"/><circle cx="412" cy="720" r="6"/></g></g>
+<text x="400" y="960" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="18" letter-spacing="8" fill="#9a9a9a">DAMIR · SHIRT</text>
+</svg>
