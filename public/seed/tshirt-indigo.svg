@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F5F5F5"/><stop offset="1" stop-color="#E6E6E6"/></linearGradient>
+<radialGradient id="sh" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba(0,0,0,.18)"/><stop offset="1" stop-color="rgba(0,0,0,0)"/></radialGradient></defs>
+<rect width="800" height="1000" fill="url(#bg)"/>
+<ellipse cx="400" cy="900" rx="260" ry="26" fill="url(#sh)"/>
+<g fill="#2E3A5C" color="#2E3A5C" stroke="none" stroke-width="3"><path d="M268 230 L345 190 Q400 236 455 190 L532 230 L640 340 L575 405 L530 368 L530 810 L270 810 L270 368 L225 405 L160 340 Z"/><path d="M345 190 Q400 250 455 190" fill="none" stroke="rgba(0,0,0,.18)" stroke-width="6"/></g>
+<text x="400" y="960" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="18" letter-spacing="8" fill="#9a9a9a">DAMIR · TSHIRT</text>
+</svg>

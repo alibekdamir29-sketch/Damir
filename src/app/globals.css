@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 6.7%;
+    --primary: 0 0% 6.7%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 6.7%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 42%;
+    --accent: 0 0% 14.5%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 89%;
+    --input: 0 0% 85%;
+    --ring: 0 0% 6.7%;
+    --radius: 0.25rem;
+  }
+  * { @apply border-border; }
+  html { -webkit-tap-highlight-color: transparent; }
+  body { @apply bg-background text-foreground antialiased; font-feature-settings: "ss01", "cv11"; }
+  ::selection { background: #111; color: #fff; }
+}
+
+@layer components {
+  .eyebrow { @apply text-[11px] font-semibold uppercase tracking-luxe text-muted-foreground; }
+  .h-display { @apply font-display font-medium leading-[1.02] tracking-tight; }
+  .link-underline { @apply relative after:absolute after:-bottom-0.5 after:left-0 after:h-px after:w-0 after:bg-current after:transition-all hover:after:w-full; }
+  .no-scrollbar { scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+}
