@@ -228,6 +228,16 @@ docker compose up -d --build
 
 Миграции применяются автоматически при старте контейнера. Фото хранятся в томе `uploads`. Поставьте перед приложением reverse-proxy с HTTPS (Caddy или Nginx).
 
+### Вариант Railway (проще всего, без терминала)
+
+1. railway.com → New Project → **Deploy from GitHub repo** → этот репозиторий (соберётся по `Dockerfile`).
+2. **+ New → Database → PostgreSQL**.
+3. Variables сервиса сайта: `DATABASE_URL=${{Postgres.DATABASE_URL}}`, `AUTH_SECRET`, `APP_URL`, `ANTHROPIC_API_KEY`, `PAYMENT_PROVIDER=none`, `UPLOAD_DIR=/data/uploads`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `CRON_SECRET`.
+4. **Volume** с путём `/data`, чтобы фото не пропадали.
+5. Settings → Networking → **Generate Domain** (или свой домен).
+
+Миграции применяются и администратор создаётся автоматически при старте. Вход: `/admin/login`.
+
 ### Вариант B — Vercel / Railway / Render + управляемый PostgreSQL (Neon, Supabase и др.)
 
 1. Задайте переменные окружения из `.env.example`.

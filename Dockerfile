@@ -25,8 +25,10 @@ COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/node_modules/prisma ./node_modules/prisma
 COPY --from=build /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=build /app/node_modules/bcryptjs ./node_modules/bcryptjs
+COPY --from=build /app/scripts/bootstrap-admin.cjs ./scripts/bootstrap-admin.cjs
 RUN mkdir -p /data/uploads && chown -R app:app /data
 USER app
 EXPOSE 3000
-# Apply pending migrations, then start
-CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && node server.js"]
+# Apply pending migrations, create the admin from ADMIN_EMAIL/ADMIN_PASSWORD if needed, then start
+CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && node scripts/bootstrap-admin.cjs && node server.js"]
