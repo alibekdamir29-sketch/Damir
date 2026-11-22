@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F5F5F5"/><stop offset="1" stop-color="#E6E6E6"/></linearGradient>
+<radialGradient id="sh" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba(0,0,0,.18)"/><stop offset="1" stop-color="rgba(0,0,0,0)"/></radialGradient></defs>
+<rect width="800" height="1000" fill="url(#bg)"/>
+<ellipse cx="400" cy="900" rx="260" ry="26" fill="url(#sh)"/>
+<g fill="#1F2A44" color="#1F2A44" stroke="none" stroke-width="3"><path d="M290 180 L362 160 L400 200 L438 160 L510 180 L600 280 L650 760 L588 772 L548 420 L575 900 L225 900 L252 420 L212 772 L150 760 L200 280 Z"/><path d="M362 160 L320 330 L400 420 L480 330 L438 160" fill="rgba(0,0,0,.2)"/><path d="M400 420 L400 900" stroke="rgba(0,0,0,.25)" stroke-width="4"/><g fill="rgba(255,255,255,.5)"><circle cx="365" cy="500" r="9"/><circle cx="435" cy="500" r="9"/><circle cx="365" cy="610" r="9"/><circle cx="435" cy="610" r="9"/></g></g>
+<text x="400" y="960" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="18" letter-spacing="8" fill="#9a9a9a">DAMIR · COAT</text>
+</svg>

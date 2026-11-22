@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F5F5F5"/><stop offset="1" stop-color="#E6E6E6"/></linearGradient>
+<radialGradient id="sh" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba(0,0,0,.18)"/><stop offset="1" stop-color="rgba(0,0,0,0)"/></radialGradient></defs>
+<rect width="800" height="1000" fill="url(#bg)"/>
+<ellipse cx="400" cy="900" rx="260" ry="26" fill="url(#sh)"/>
+<g fill="#FAFAFA" color="#FAFAFA" stroke="rgba(0,0,0,.12)" stroke-width="3"><path d="M272 170 L528 170 L552 840 L432 840 L400 390 L368 840 L248 840 Z"/><path d="M272 215 L528 215" stroke="rgba(0,0,0,.2)" stroke-width="4"/><path d="M300 215 Q330 290 390 270 M500 215 Q470 290 410 270" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="4"/><path d="M400 215 L400 390" stroke="rgba(255,255,255,.3)" stroke-width="4"/></g>
+<text x="400" y="960" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="18" letter-spacing="8" fill="#9a9a9a">DAMIR · JEANS</text>
+</svg>

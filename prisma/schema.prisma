@@ -1,0 +1,472 @@
+// DAMIR — Prisma schema (PostgreSQL)
+// Prices are whole tenge (KZT) stored in Int columns, e.g. 24990 = 24 990 ₸.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Season {
+  ALL_SEASON
+  SPRING_SUMMER
+  AUTUMN_WINTER
+  SUMMER
+  WINTER
+}
+
+enum OrderStatus {
+  NEW
+  CONFIRMED
+  PAYMENT_PENDING
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH_ON_DELIVERY
+  ONLINE
+  BANK_TRANSFER
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum DeliveryType {
+  COURIER
+  PICKUP
+}
+
+enum MovementType {
+  INITIAL
+  RESTOCK
+  ADJUSTMENT
+  RESERVE
+  RELEASE
+  SALE
+  RETURN
+}
+
+enum AiRole {
+  USER
+  ASSISTANT
+}
+
+// ───────────── Users & auth ─────────────
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  firstName    String   @map("first_name")
+  lastName     String?  @map("last_name")
+  phone        String?
+  role         Role     @default(USER)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  admin           Admin?
+  addresses       Address[]
+  orders          Order[]
+  carts           Cart[]
+  aiConversations AiConversation[]
+
+  @@map("users")
+}
+
+/// Admin profile. A user is an administrator only when role = ADMIN AND an admins row exists.
+model Admin {
+  id          String    @id @default(cuid())
+  userId      String    @unique @map("user_id")
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String?
+  lastLoginAt DateTime? @map("last_login_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  movements InventoryMovement[]
+  statusChanges OrderStatusHistory[]
+
+  @@map("admins")
+}
+
+model Address {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  city      String
+  street    String
+  house     String
+  apartment String?
+  comment   String?
+  isDefault Boolean  @default(false) @map("is_default")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+// ───────────── Catalog ─────────────
+
+model Category {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  name        String
+  description String?
+  imageUrl    String?   @map("image_url")
+  sortOrder   Int       @default(0) @map("sort_order")
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  products    Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id           String   @id @default(cuid())
+  sku          String   @unique // артикул
+  slug         String   @unique
+  name         String
+  description  String
+  categoryId   String   @map("category_id")
+  category     Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  price        Int // current price, ₸
+  oldPrice     Int?     @map("old_price") // price before discount, ₸
+  material     String?
+  composition  String? // состав ткани
+  season       Season   @default(ALL_SEASON)
+  style        String?
+  isActive     Boolean  @default(true) @map("is_active")
+  isFeatured   Boolean  @default(false) @map("is_featured")
+  isNew        Boolean  @default(false) @map("is_new")
+  popularity   Int      @default(0) // incremented on each sold unit
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  images   ProductImage[]
+  colors   ProductColor[]
+  sizes    ProductSize[]
+  variants ProductVariant[]
+
+  @@index([categoryId, isActive])
+  @@index([isActive, createdAt])
+  @@index([isActive, popularity])
+  @@index([price])
+  @@map("products")
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String  @map("product_id")
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String?
+  sortOrder Int     @default(0) @map("sort_order")
+  colorId   String? @map("color_id") // optional: image specific to a color
+  color     ProductColor? @relation(fields: [colorId], references: [id], onDelete: SetNull)
+
+  @@index([productId, sortOrder])
+  @@map("product_images")
+}
+
+model ProductColor {
+  id        String  @id @default(cuid())
+  productId String  @map("product_id")
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String // e.g. "Чёрный"
+  hex       String // e.g. "#111111"
+  sortOrder Int     @default(0) @map("sort_order")
+
+  variants ProductVariant[]
+  images   ProductImage[]
+
+  @@unique([productId, name])
+  @@map("product_colors")
+}
+
+model ProductSize {
+  id        String  @id @default(cuid())
+  productId String  @map("product_id")
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  label     String // e.g. "M", "42", "ONE SIZE"
+  sortOrder Int     @default(0) @map("sort_order")
+
+  variants ProductVariant[]
+
+  @@unique([productId, label])
+  @@map("product_sizes")
+}
+
+/// A sellable combination of product + color + size. Stock lives in `inventory`.
+model ProductVariant {
+  id        String       @id @default(cuid())
+  productId String       @map("product_id")
+  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  colorId   String       @map("color_id")
+  color     ProductColor @relation(fields: [colorId], references: [id], onDelete: Cascade)
+  sizeId    String       @map("size_id")
+  size      ProductSize  @relation(fields: [sizeId], references: [id], onDelete: Cascade)
+  sku       String       @unique
+  isActive  Boolean      @default(true) @map("is_active")
+
+  inventory  Inventory?
+  movements  InventoryMovement[]
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  @@unique([productId, colorId, sizeId])
+  @@index([productId])
+  @@map("product_variants")
+}
+
+/// On-hand quantity and quantity reserved by open orders.
+/// Available to sell = quantity - reserved. DB CHECK constraints forbid negatives.
+model Inventory {
+  id        String         @id @default(cuid())
+  variantId String         @unique @map("variant_id")
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  quantity  Int            @default(0)
+  reserved  Int            @default(0)
+  lowStockThreshold Int    @default(3) @map("low_stock_threshold")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+
+  @@map("inventory")
+}
+
+model InventoryMovement {
+  id             String         @id @default(cuid())
+  variantId      String         @map("variant_id")
+  variant        ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  type           MovementType
+  quantityDelta  Int            @map("quantity_delta") // change of on-hand quantity
+  reservedDelta  Int            @default(0) @map("reserved_delta") // change of reserved
+  quantityAfter  Int            @map("quantity_after")
+  reservedAfter  Int            @map("reserved_after")
+  reason         String?
+  orderId        String?        @map("order_id")
+  order          Order?         @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  adminId        String?        @map("admin_id")
+  admin          Admin?         @relation(fields: [adminId], references: [id], onDelete: SetNull)
+  createdAt      DateTime       @default(now()) @map("created_at")
+
+  @@index([variantId, createdAt])
+  @@index([orderId])
+  @@map("inventory_movements")
+}
+
+// ───────────── Cart ─────────────
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String?    @map("user_id")
+  user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  items     CartItem[]
+
+  @@index([userId])
+  @@map("carts")
+}
+
+model CartItem {
+  id        String         @id @default(cuid())
+  cartId    String         @map("cart_id")
+  cart      Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  variantId String         @map("variant_id")
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  quantity  Int
+  createdAt DateTime       @default(now()) @map("created_at")
+
+  @@unique([cartId, variantId])
+  @@map("cart_items")
+}
+
+// ───────────── Orders ─────────────
+
+model Order {
+  id             String        @id @default(cuid())
+  number         String        @unique // DM-2026-0001
+  publicToken    String        @unique @map("public_token") // secret for tracking link
+  idempotencyKey String        @unique @map("idempotency_key")
+  userId         String?       @map("user_id")
+  user           User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  status         OrderStatus   @default(NEW)
+
+  // customer snapshot
+  firstName String  @map("first_name")
+  lastName  String  @map("last_name")
+  phone     String
+  email     String?
+
+  // delivery snapshot
+  deliveryType   DeliveryType @map("delivery_type")
+  deliveryMethodName String   @map("delivery_method_name")
+  city           String?
+  street         String?
+  house          String?
+  apartment      String?
+  addressLine    String?      @map("address_line")
+  comment        String?
+
+  paymentMethod PaymentMethod @map("payment_method")
+
+  subtotal     Int
+  deliveryCost Int @map("delivery_cost")
+  total        Int
+  currency     String @default("KZT")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  items         OrderItem[]
+  statusHistory OrderStatusHistory[]
+  payments      Payment[]
+  movements     InventoryMovement[]
+
+  @@index([status, createdAt])
+  @@index([phone])
+  @@index([userId])
+  @@map("orders")
+}
+
+/// Snapshot of what was bought. Never changes when the catalog changes.
+model OrderItem {
+  id          String          @id @default(cuid())
+  orderId     String          @map("order_id")
+  order       Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variantId   String?         @map("variant_id")
+  variant     ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  productId   String?         @map("product_id")
+  productName String          @map("product_name")
+  productSku  String          @map("product_sku")
+  variantSku  String          @map("variant_sku")
+  colorName   String          @map("color_name")
+  sizeLabel   String          @map("size_label")
+  imageUrl    String?         @map("image_url")
+  unitPrice   Int             @map("unit_price")
+  quantity    Int
+  lineTotal   Int             @map("line_total")
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model OrderStatusHistory {
+  id         String       @id @default(cuid())
+  orderId    String       @map("order_id")
+  order      Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fromStatus OrderStatus? @map("from_status")
+  toStatus   OrderStatus  @map("to_status")
+  note       String?
+  adminId    String?      @map("admin_id")
+  admin      Admin?       @relation(fields: [adminId], references: [id], onDelete: SetNull)
+  source     String       @default("system") // system | admin | payment
+  createdAt  DateTime     @default(now()) @map("created_at")
+
+  @@index([orderId, createdAt])
+  @@map("order_status_history")
+}
+
+model OrderCounter {
+  year  Int @id
+  value Int @default(0)
+
+  @@map("order_counters")
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  orderId           String        @map("order_id")
+  order             Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider          String // cod | bank_transfer | test | cloudpayments ...
+  method            PaymentMethod
+  status            PaymentStatus @default(PENDING)
+  amount            Int
+  currency          String        @default("KZT")
+  providerPaymentId String?       @map("provider_payment_id")
+  rawPayload        Json?         @map("raw_payload") // last webhook payload (no card data)
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+  paidAt            DateTime?     @map("paid_at")
+
+  @@unique([provider, providerPaymentId])
+  @@index([orderId])
+  @@map("payments")
+}
+
+// ───────────── AI ─────────────
+
+model AiConversation {
+  id        String      @id @default(cuid())
+  userId    String?     @map("user_id")
+  user      User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  cartId    String?     @map("cart_id")
+  ipHash    String?     @map("ip_hash")
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+  messages  AiMessage[]
+
+  @@map("ai_conversations")
+}
+
+model AiMessage {
+  id             String         @id @default(cuid())
+  conversationId String         @map("conversation_id")
+  conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           AiRole
+  /// Full Anthropic content blocks (text, tool_use, tool_result, thinking) — replayed verbatim.
+  content        Json
+  /// Plain text shown in the chat UI.
+  displayText    String?        @map("display_text")
+  /// Product ids rendered as cards with this message.
+  productIds     String[]       @default([]) @map("product_ids")
+  inputTokens    Int?           @map("input_tokens")
+  outputTokens   Int?           @map("output_tokens")
+  createdAt      DateTime       @default(now()) @map("created_at")
+
+  @@index([conversationId, createdAt])
+  @@map("ai_messages")
+}
+
+// ───────────── Settings & audit ─────────────
+
+/// Key/value store settings (JSON values). See src/lib/settings.ts for the typed shape.
+model StoreSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("store_settings")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?  @map("actor_id")
+  action    String
+  entity    String?
+  entityId  String?  @map("entity_id")
+  meta      Json?
+  ip        String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

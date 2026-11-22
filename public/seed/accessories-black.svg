@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F5F5F5"/><stop offset="1" stop-color="#E6E6E6"/></linearGradient>
+<radialGradient id="sh" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba(0,0,0,.18)"/><stop offset="1" stop-color="rgba(0,0,0,0)"/></radialGradient></defs>
+<rect width="800" height="1000" fill="url(#bg)"/>
+<ellipse cx="400" cy="900" rx="260" ry="26" fill="url(#sh)"/>
+<g fill="#111111" color="#111111" stroke="none" stroke-width="3"><path d="M240 400 L560 400 L590 820 L210 820 Z"/><path d="M320 400 Q320 250 400 250 Q480 250 480 400" fill="none" stroke-width="22" stroke="currentColor"/><rect x="370" y="480" width="60" height="18" rx="4" fill="rgba(255,255,255,.55)"/></g>
+<text x="400" y="960" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="18" letter-spacing="8" fill="#9a9a9a">DAMIR · ACCESSORIES</text>
+</svg>
