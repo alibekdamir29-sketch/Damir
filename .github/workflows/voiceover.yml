@@ -1,0 +1,31 @@
+name: Voiceover (TTS)
+on:
+  push:
+    branches: [claude/project-thread-6eyit7]
+    paths: ['voiceover/*.txt', '.github/workflows/voiceover.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  tts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install edge-tts==7.0.2
+      - name: Generate audio
+        run: |
+          for f in voiceover/*.txt; do
+            n=$(basename "$f" .txt)
+            edge-tts --voice kk-KZ-DauletNeural --rate=+8% -f "$f" --write-media "voiceover/$n-daulet.mp3"
+            edge-tts --voice kk-KZ-AigulNeural  --rate=+8% -f "$f" --write-media "voiceover/$n-aigul.mp3"
+          done
+          ls -la voiceover
+      - name: Commit audio
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add voiceover/*.mp3
+          git commit -m "Generate voiceover audio [skip ci]" || echo "nothing to commit"
+          git push
