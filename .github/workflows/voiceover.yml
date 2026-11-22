@@ -16,12 +16,13 @@ jobs:
       - run: pip install --upgrade edge-tts && pip show edge-tts | head -2
       - name: Generate audio
         run: |
+          set +e
+          tts() { for k in 1 2 3 4; do edge-tts --voice "$1" --rate="$2" -f "$3" --write-media "$4" && [ -s "$4" ] && return 0; echo "retry $k: $3"; rm -f "$4"; sleep 3; done; echo "FAILED: $3"; }
           for f in voiceover/*.txt; do
             n=$(basename "$f" .txt)
             case "$n" in
-              *-ru-*) edge-tts --voice ru-RU-DmitryNeural --rate=+5% -f "$f" --write-media "voiceover/$n.mp3" ;;
-              *-kk-*) edge-tts --voice kk-KZ-DauletNeural --rate=+8% -f "$f" --write-media "voiceover/$n.mp3" ;;
-              *) [ -f "voiceover/$n-daulet.mp3" ] || edge-tts --voice kk-KZ-DauletNeural --rate=+8% -f "$f" --write-media "voiceover/$n-daulet.mp3" ;;
+              *-ru-*) [ -s "voiceover/$n.mp3" ] || tts ru-RU-DmitryNeural +5% "$f" "voiceover/$n.mp3" ;;
+              *-kk-*) [ -s "voiceover/$n.mp3" ] || tts kk-KZ-DauletNeural +8% "$f" "voiceover/$n.mp3" ;;
             esac
           done
           ls -la voiceover
