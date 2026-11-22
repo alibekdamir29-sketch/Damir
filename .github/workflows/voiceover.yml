@@ -17,7 +17,7 @@ jobs:
       - name: Generate audio
         run: |
           set +e
-          tts() { for k in 1 2 3 4; do edge-tts --voice "$1" --rate="$2" -f "$3" --write-media "$4" && [ -s "$4" ] && return 0; echo "retry $k: $3"; rm -f "$4"; sleep 3; done; echo "FAILED: $3"; }
+          tts() { for k in 1 2 3 4 5 6; do edge-tts --voice "$1" --rate="$2" -f "$3" --write-media "$4" && [ -s "$4" ] && return 0; echo "retry $k: $3"; rm -f "$4"; sleep $((k*5)); done; echo "FAILED: $3"; }
           for f in voiceover/*.txt; do
             n=$(basename "$f" .txt)
             case "$n" in
