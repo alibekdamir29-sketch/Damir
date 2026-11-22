@@ -18,8 +18,11 @@ jobs:
         run: |
           for f in voiceover/*.txt; do
             n=$(basename "$f" .txt)
-            edge-tts --voice kk-KZ-DauletNeural --rate=+8% -f "$f" --write-media "voiceover/$n-daulet.mp3"
-            edge-tts --voice kk-KZ-AigulNeural  --rate=+8% -f "$f" --write-media "voiceover/$n-aigul.mp3"
+            case "$n" in
+              *-ru-*) edge-tts --voice ru-RU-DmitryNeural --rate=+5% -f "$f" --write-media "voiceover/$n.mp3" ;;
+              *-kk-*) edge-tts --voice kk-KZ-DauletNeural --rate=+8% -f "$f" --write-media "voiceover/$n.mp3" ;;
+              *) [ -f "voiceover/$n-daulet.mp3" ] || edge-tts --voice kk-KZ-DauletNeural --rate=+8% -f "$f" --write-media "voiceover/$n-daulet.mp3" ;;
+            esac
           done
           ls -la voiceover
       - name: Commit audio
