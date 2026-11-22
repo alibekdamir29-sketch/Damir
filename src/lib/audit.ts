@@ -10,7 +10,7 @@ export async function audit(entry: {
   meta?: Prisma.InputJsonValue;
   ip?: string;
 }) {
-  console.info(JSON.stringify({ level: "info", type: "audit", ...entry, at: new Date().toISOString() }));
+  if (!process.env.VITEST) console.info(JSON.stringify({ level: "info", type: "audit", ...entry, at: new Date().toISOString() }));
   try {
     await prisma.auditLog.create({ data: { ...entry, actorId: entry.actorId ?? null } });
   } catch (e) {

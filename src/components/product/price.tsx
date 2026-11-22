@@ -4,7 +4,7 @@ export function Price({ price, oldPrice, className, size = "md" }: { price: numb
   const d = discountPercent(price, oldPrice);
   return (
     <div className={cn("flex flex-wrap items-baseline gap-x-3 gap-y-1", className)}>
-      <span className={cn("font-semibold tabular-nums", size === "lg" ? "text-2xl" : size === "sm" ? "text-sm" : "text-[15px]", d && "text-red-700")}>{formatPrice(price)}</span>
+      <span data-price={price} className={cn("font-semibold tabular-nums", size === "lg" ? "text-2xl" : size === "sm" ? "text-sm" : "text-[15px]", d && "text-red-700")}>{formatPrice(price)}</span>
       {d && (
         <>
           <span className={cn("tabular-nums text-neutral-400 line-through", size === "lg" ? "text-base" : "text-sm")}>{formatPrice(oldPrice!)}</span>
